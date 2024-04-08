@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import { MeshDocument } from './meshDocument';
 import { disposeAll, getNonce } from './utils';
 
@@ -38,7 +39,18 @@ export class MeshViewProvider implements vscode.CustomReadonlyEditorProvider<Mes
     openContext: vscode.CustomDocumentOpenContext,
     token: vscode.CancellationToken
   ): Promise<MeshDocument> {
-    const document = new MeshDocument(uri);
+    const fileSize = fs.statSync(uri.fsPath).size;
+    console.log("file size:", fileSize);
+    const maxFileSizeMB = vscode.workspace.getConfiguration('3dpreview').get('maxFileSize', 500);
+    const maxFileSize = maxFileSizeMB * 1024 * 1024;
+    
+    if (fileSize > maxFileSize) {
+      vscode.window.showInformationMessage(
+        `The file size exceeds the maximum value you set. (${maxFileSizeMB} MB)`, 
+      )
+    }
+
+    const document = new MeshDocument(uri, fileSize <= maxFileSize);
     const listeners: vscode.Disposable[] = [];
 
     listeners.push(document.onDidChangeDocument(e => {
@@ -57,6 +69,10 @@ export class MeshViewProvider implements vscode.CustomReadonlyEditorProvider<Mes
     webviewPanel: vscode.WebviewPanel,
     token: vscode.CancellationToken
   ): Promise<void> {
+    if (!document.shouldLoadCustomViewer) {
+      return;
+    }
+
     // add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
 

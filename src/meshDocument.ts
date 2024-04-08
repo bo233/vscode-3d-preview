@@ -6,7 +6,7 @@ export class MeshDocument implements vscode.CustomDocument {
   private isDisposed = false;
   private disposables: vscode.Disposable[] = [];
 
-  public constructor(public uri: vscode.Uri) {}
+  public constructor(public uri: vscode.Uri, public shouldLoadCustomViewer: boolean) {}
 
   private readonly _onDidDispose = this._register(new vscode.EventEmitter<void>());
   public readonly onDidDispose = this._onDidDispose.event;

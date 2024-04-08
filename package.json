@@ -114,6 +114,11 @@
           "type": "number",
           "default": 0,
           "description": "Fog density."
+        },
+        "3dpreview.maxFileSize": {
+          "type": "integer",
+          "default": 200,
+          "description": "Max file size (MB) to active previewer."
         }
       }
     }
